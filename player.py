@@ -9,6 +9,7 @@ class Character:
         self.alive = True
 
 
+
     def take_damage(self, amount, attacker=None):
         self.hp = self.hp - amount
         if(self.hp <= 0):
