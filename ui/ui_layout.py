@@ -2,7 +2,8 @@ from .encounter_view import EncounterView
 from models.logs import EncounterLogs
 
 class UILayout:
-    def __init__(self, stdscr, player, location, logs):
+    def __init__(self, stdscr, model):
+        self.model = model
         self.stdscr = stdscr
         self.win_header = None
         self.win_left_player = None
@@ -10,11 +11,11 @@ class UILayout:
         self.win_encounter = None
         self.win_combat_log = None
         self.win_system_log = None
-        self.player = player
-        self.location = location
-        self.logs = logs
+        self.player = self.model.player
+        self.location = self.model.location
 
-        self.encounter_view = EncounterView(self.stdscr, self.logs.encounter)
+        self.logs = self.model.message_logs
+
 
         self.win_h = {
             "header" : 3,
@@ -31,6 +32,26 @@ class UILayout:
             "system_log": (self.win_h["header"] + self.win_h["player_enemy"] + self.win_h["encounter"] + self.win_h["combat_log"] + 1, self.win_h["header"] + self.win_h["player_enemy"] + self.win_h["encounter"] + self.win_h["combat_log"] + self.win_h["system_log"] - 2),
         }
 
+        self.win_col_ranges = {
+            "header" : (1, 99),
+            "player" : (1, 49),
+            "enemy" : (51, 99),
+            "encounter" : (1, 99),
+            "combat_log": (1, 99),
+            "system_log": (1, 99),
+        }
+
+        self.encounter_view = EncounterView(self.stdscr, self.logs.encounter, self.win_row_ranges["encounter"], self.win_col_ranges["encounter"])
+
+    def draw(self):
+        self.init_windows()
+        self.draw_windows()
+        self.draw_headlines()
+        self.draw_descriptions()
+        self.draw_header()
+        self.draw_encounter_info()
+
+        self.draw_system()
 
     def init_windows(self):
         header_xy = 0
@@ -38,7 +59,6 @@ class UILayout:
 
         player_enemy_h = 12
         width = 100
-
         encounter_y = 12
         encounter_h = 7
         combat_log_h = 6
@@ -59,6 +79,13 @@ class UILayout:
         self.win_combat_log.box()
         self.win_system_log.box()
 
+        self.win_header.noutrefresh()
+        self.win_left_player.noutrefresh()
+        self.win_right_enemy.noutrefresh()
+        self.win_encounter.noutrefresh()
+        self.win_combat_log.noutrefresh()
+        self.win_system_log.noutrefresh()
+
 
     def draw_headlines(self):
         self.stdscr.addstr(3, 22, f" Player ")
@@ -66,7 +93,7 @@ class UILayout:
         self.stdscr.addstr(15, 40, f" Encounter / Story Area ")
         self.stdscr.addstr(22, 44, f" Combat Log ")
         self.stdscr.addstr(28, 44, f" System/Help ")
-        self.stdscr.refresh()
+        #self.stdscr.refresh()
 
     def draw_descriptions(self):
         self.draw_header()
@@ -76,7 +103,13 @@ class UILayout:
                                  f"XP {self.player.xp}/{self.player.level_ups_list[self.player.level]} | Gold: {self.player.gold} | "
                                  f"Area: {self.location.name}")
 
+    def draw_system(self):
+        min_y, max_y = self.win_row_ranges["system_log"]
+        self.stdscr.addstr(min_y, 1,
+                           f"{self.model.prompt}")
+
     def draw_encounter_info(self):
+        '''
         min_y, max_y = self.win_row_ranges["player_enemy"]
         self.stdscr.addstr(min_y, 0, "GG", 0)
         self.stdscr.addstr(max_y, 0, "KK", 0)
@@ -84,6 +117,6 @@ class UILayout:
         for min_y, max_y in self.win_row_ranges.values():
             self.stdscr.addstr(min_y, 0, "GG", 0)
             self.stdscr.addstr(max_y, 0, "KK", 0)
+        '''
 
-
-        self.encounter_view.print_encounter_info()
+        self.encounter_view.draw_combat_log()
