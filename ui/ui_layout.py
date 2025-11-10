@@ -109,14 +109,4 @@ class UILayout:
                            f"{self.model.prompt}")
 
     def draw_encounter_info(self):
-        '''
-        min_y, max_y = self.win_row_ranges["player_enemy"]
-        self.stdscr.addstr(min_y, 0, "GG", 0)
-        self.stdscr.addstr(max_y, 0, "KK", 0)
-
-        for min_y, max_y in self.win_row_ranges.values():
-            self.stdscr.addstr(min_y, 0, "GG", 0)
-            self.stdscr.addstr(max_y, 0, "KK", 0)
-        '''
-
         self.encounter_view.draw_combat_log()

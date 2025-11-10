@@ -19,7 +19,6 @@ class GameModel:
         self.prompt = "[M] to move, [A] to hunt"
        # self.combat_log = []
         self.player_log = []
-        self.encounter_log = []
 
         self.commands = {
             "EXPLORE" : {
@@ -103,7 +102,7 @@ class GameModel:
 
     def cmd_flee(self):
         if(self.can_flee):
-            flee_chance = 1 - pow(0.5,  (self.player.level - self.encounter.level + 1))
+            flee_chance = 1 - pow(0.5, (self.player.level - self.encounter.level + 1))
             if flee_chance < 0:
                 flee_chance = 0
             print(f"Chance to flee is: {flee_chance*100}%.")
@@ -116,13 +115,6 @@ class GameModel:
                 self.can_flee = False
         else:
             pass
-
-    def print_combat_log(self):
-        self.stdscr.addstr(5, 0, "")
-        for line in self.combat_log[-4:]:
-            for text, attr in line:
-                self.stdscr.addstr(text, attr)
-            self.stdscr.addstr("\n")
 
     def update_player_log(self):
         log = [
@@ -140,12 +132,6 @@ class GameModel:
                 (f"] HP", "normal")
             ]
             self.message_logs.encounter.enemy.add_line(log)
-            log = [
-                (f"{self.encounter.name} [", "normal"),
-                (f"{self.encounter.hp}", "hp_value"),
-                (f"] HP", "normal")
-            ]
-            self.encounter_log = log
 
 
 
