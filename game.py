@@ -1,29 +1,32 @@
 import random
 from random import randint
 import math
-from rich.console import Console
 import curses
 import os
-
-
-
+from ui.ui_layout import UILayout
+from models.logs import MessageLogs, EncounterLogs
+from ui.encounter_view import EncounterView
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-
-console = Console()
 class Game:
     def __init__(self, player, location):
+        self.stdscr = None
+
         self.player = player
         self.location = location
         self.locations = []
+        #self.message_logs = None
+        self.message_logs = None
         self.can_flee = True
         self.mode = "EXPLORE"
         self.encounter = None
-        self.stdscr = None
-        self.combat_log = []
+        self.UI = None
+
+       # self.combat_log = []
         self.player_log = []
         self.encounter_log = []
+
         self.commands = {
             "EXPLORE" : {
                 "M" : self.cmd_move,
@@ -33,7 +36,10 @@ class Game:
             "ENCOUNTER": {
                 "A" : self.cmd_attack,
                 "F" : self.cmd_flee,
-            }
+            },
+            "ENCOUNTER_END": {
+                "L" : self.cmd_leave,
+            },
         }
 
     def start(self):
@@ -52,25 +58,36 @@ class Game:
         curses.init_pair(1, curses.COLOR_RED, -1)
         curses.init_pair(2, curses.COLOR_GREEN, -1)
         curses.init_pair(3, curses.COLOR_CYAN, -1)
-
         self.main_game_loop()
 
     def main_game_loop(self):
+        self.message_logs = MessageLogs(self.stdscr)
+        self.UI = UILayout(self.stdscr, self.player, self.location, self.message_logs)
+
         while True:
-
-
+            #initialize
             self.stdscr.erase()
+            self.UI.init_windows()
+            self.UI.draw_windows()
+            self.UI.draw_descriptions()
+            self.UI.draw_header()
+            self.UI.draw_headlines()
+            self.stdscr.refresh()
+
+            #main loop
             if self.mode == "EXPLORE":
                 prompt = "[M] to move, [A] to hunt"
-            else:
+            elif self.mode == "ENCOUNTER":
                 prompt = "[A] to attack, [F] to flee"
-            self.print_player_info()
-            self.print_combat_log()
-            self.print_encounter_info()
+            elif self.mode == "ENCOUNTER_END":
+                prompt = "[L] to leave"
+
             self.stdscr.addstr(10, 0, f"{prompt}")
+            self.UI.draw_encounter_info()
             self.stdscr.refresh()
             cmd = self.stdscr.get_wch()
-            self.stdscr.refresh()
+
+
             action = self.commands[self.mode][cmd]
             if not action:
                 print("Unknown command. Press ? for help.")
@@ -78,12 +95,14 @@ class Game:
             action()
             self.stdscr.refresh()
 
+
     def cmd_help(self):
         if(self.mode == "EXPLORE"):
             print(f"{self.location} with enemies: {self.location.print_enemies()}")
         else:
             enemy = self.encounter
             print(f"Combat with {enemy.name} with [{enemy.hp} HP]")
+
 
     def cmd_move(self, destination):
 
@@ -103,11 +122,28 @@ class Game:
     def cmd_attack(self):
         dmg_amount = self.player.attack()
         self.encounter.take_damage(dmg_amount, self.player)
-        #console.print(f"Hit for  [[red]-{dmg_amount}[/red] HP].")
-        #console.print(f"{self.encounter.name} has [[red]{self.encounter.hp}[/red] HP].")
-
         log = [("Hit for ", 0), (f"-{dmg_amount}", curses.color_pair(1)), (" HP", 2)]
-        self.log_append(log)
+        self.message_logs.encounter.combat.add_line(log)
+        self.update_encounter_info()
+
+        if not self.is_encounter_alive():
+            log = [(f"{self.player.name} killed {self.encounter.name} and gained {self.encounter.xp}xp", 0)]
+            self.message_logs.encounter.end.add_line(log)
+
+            #reset
+            self.location.remove_enemy(self.encounter)
+            self.message_logs.encounter.clear_combat_logs()
+            self.encounter = None
+            self.mode = "ENCOUNTER_END"
+
+    def cmd_leave(self):
+        if self.mode == "ENCOUNTER_END":
+            self.message_logs.encounter.clear_logs()
+            self.mode = "EXPLORE"
+
+
+    def is_encounter_alive(self):
+        return self.encounter.alive
 
     def cmd_flee(self):
         if(self.can_flee):
@@ -124,9 +160,6 @@ class Game:
                 self.can_flee = False
         else:
             pass
-
-    def log_append(self, log):
-        self.combat_log.append(log)
 
     def print_combat_log(self):
         self.stdscr.addstr(5, 0, "")
@@ -150,21 +183,25 @@ class Game:
                 (f"{self.encounter.hp}", curses.color_pair(1)),
                 (f"] HP", 0)
             ]
+            self.message_logs.encounter.enemy.add_line(log)
+            log = [
+                (f"{self.encounter.name} [", 0),
+                (f"{self.encounter.hp}", curses.color_pair(1)),
+                (f"] HP", 0)
+            ]
             self.encounter_log = log
 
     def print_encounter_info(self):
-        self.update_encounter_info()
-        self.stdscr.addstr(0, 18, "")
+        for log in self.message_logs.encounter:
+            x = log.x
+            for line in log.lines:
+                self.stdscr.addstr(x, log.y, "")
+                x = x + 1
+                for text, attr in line:
+                    self.stdscr.addstr(text, attr)
 
-        for text, attr in self.encounter_log:
-            self.stdscr.addstr(text, attr)
 
-    def print_player_info(self):
-        self.update_player_log()
-        self.stdscr.addstr(0, 0, "")
 
-        for text, attr in self.player_log:
-            self.stdscr.addstr(text, attr)
 
 
 

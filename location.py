@@ -19,3 +19,6 @@ class Location:
                 print(f"{enemy.name} [{enemy.hp} HP]")
             else:
                 print(f"{enemy.name} [{enemy.hp} HP], ")
+
+    def remove_enemy(self, enemy):
+        self.enemies.remove(enemy)

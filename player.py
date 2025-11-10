@@ -3,8 +3,10 @@ class Character:
     def __init__(self, name, hp, xp):
         self.name = name
         self.hp = hp
+        self.max_hp = hp
         self.xp = xp
         self.level = 1
+        self.gold = 0
         self.level_ups_list = [0, 10, 20, 30, 40, 50]
         self.alive = True
 
@@ -37,7 +39,7 @@ class Character:
         if(self.xp >= self.level_ups_list[self.level]):
             self.xp = self.xp - self.level_ups_list[self.level]
             self.level = self.level + 1
-            print(self.name + " just leveled up to level " + str(self.level))
+            #print(self.name + " just leveled up to level " + str(self.level))
 
 
 

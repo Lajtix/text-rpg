@@ -1,20 +1,20 @@
 from player import Character
 from location import Location
-from rich.console import Console
+
 from game import Game
 import curses
-console = Console()
+
 
 
 NPC1 = Character("Greg", 5, 11)
 NPC2 = Character("Greg", 10, 22)
-NPC3 = Character("Greg", 15, 33)
+NPC3 = Character("Bear", 15, 33)
 NPC4 = Character("Greg", 20, 44)
 NPC5 = Character("Bear", 20, 8)
 Player = Character("Luba", 7, 2)
 enemies = [NPC1, NPC2, NPC3, NPC4]
 
-console.print("[bold green]Welcome hero![/]")
+#console.print("[bold green]Welcome hero![/]")
 
 dark_forest = Location("Dark Forest", "Bear")
 dark_forest.add_enemy(NPC5)
