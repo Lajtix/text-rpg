@@ -23,13 +23,6 @@ class GameView:
 
     def draw(self):
         self.UI.draw()
-
-
-
-
-
-
-
         self.stdscr.noutrefresh()
         curses.doupdate()
 
