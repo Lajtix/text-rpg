@@ -15,8 +15,9 @@ class EncounterLogs:
     def __init__(self):
         self.combat = Log(4, 5, 0)
         self.loot = Log(20, 12, 0)
-        self.end = Log(3, 3, 0)
+        self.end = Log(1, 3, 0)
         self.enemy = Log(1, 0, 18)
+        self.flee = Log(1, 0, 0)
 
     def __iter__(self):
         yield self.combat

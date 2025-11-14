@@ -11,15 +11,12 @@ class GameModel:
         self.player = player
         self.location = location
         self.locations = []
-        #self.message_logs = None
-        self.message_logs = self.message_logs = MessageLogs()
+        self.message_logs =  MessageLogs()
         self.can_flee = True
         self.mode = "EXPLORE"
         self.encounter = None
         self.prompt = "[M] to move, [A] to hunt"
-       # self.combat_log = []
-        self.player_log = []
-
+        self.message_logs.encounter.flee.add_line([("gggggg", "normal")])
         self.commands = {
             "EXPLORE" : {
                 "M" : self.cmd_move,
@@ -76,24 +73,19 @@ class GameModel:
 
     def cmd_attack(self):
         dmg_amount = self.player.attack()
-        self.encounter.take_damage(dmg_amount, self.player)
-        log = [("Hit for ", "normal"), (f"-{dmg_amount}", "damage"), (" HP", "hp_value")]
-        self.message_logs.encounter.combat.add_line(log)
+        self.encounter.take_damage(dmg_amount, self.player, self.message_logs.encounter.combat)
         self.update_encounter_info()
 
         if not self.is_encounter_alive():
             log = [(f"{self.player.name} killed {self.encounter.name} and gained {self.encounter.xp}xp", "normal")]
             self.message_logs.encounter.end.add_line(log)
-
-            #reset
-            self.location.remove_enemy(self.encounter)
-            self.message_logs.encounter.clear_combat_logs()
-            self.encounter = None
             self.mode = "ENCOUNTER_END"
 
     def cmd_leave(self):
         if self.mode == "ENCOUNTER_END":
-            self.message_logs.encounter.clear_logs()
+            self.location.remove_enemy(self.encounter)
+            self.message_logs.encounter.clear_combat_logs()
+            self.encounter = None
             self.mode = "EXPLORE"
 
 
@@ -101,20 +93,22 @@ class GameModel:
         return self.encounter.alive
 
     def cmd_flee(self):
-        if(self.can_flee):
-            flee_chance = 1 - pow(0.5, (self.player.level - self.encounter.level + 1))
-            if flee_chance < 0:
-                flee_chance = 0
-            print(f"Chance to flee is: {flee_chance*100}%.")
-            if(random.random() <= flee_chance):
-                self.encounter = None
-                self.mode = "EXPLORE"
+        self.message_logs.encounter.flee.add_line([("gggggg", "normal")])
+        if (self.can_flee):
+            if (self.encounter.flee(self.player) == 1):
+                #self.encounter = None
+                self.mode = "ENCOUNTER_END"
+                log = [("Flee was successful", "normal")]
+                self.message_logs.encounter.flee.add_line(log)
                 print(f"Flee was successful")
             else:
+                log = [("Flee was not successful", "normal")]
+                self.message_logs.encounter.flee.add_line(log)
                 print(f"Flee wasn't successful")
                 self.can_flee = False
         else:
             pass
+
 
     def update_player_log(self):
         log = [
@@ -123,6 +117,7 @@ class GameModel:
             (f"] HP", "normal")
         ]
         self.player_log = log
+
 
     def update_encounter_info(self):
         if(self.encounter != None):

@@ -1,4 +1,4 @@
-from models.player import Character
+from models.player import Character, Player, Monster
 from models.location import Location
 from game_model import GameModel
 from ui.game_view import GameView
@@ -8,12 +8,12 @@ def main(stdscr):
 
 
 
-    NPC1 = Character("Greg", 5, 11)
-    NPC2 = Character("Greg", 10, 22)
-    NPC3 = Character("Bear", 15, 33)
-    NPC4 = Character("Greg", 20, 44)
-    NPC5 = Character("Bear", 20, 8)
-    Player = Character("Luba", 7, 2)
+    NPC1 = Monster("Greg", 5, 11)
+    NPC2 = Monster("Greg", 10, 22)
+    NPC3 = Monster("Bear", 15, 33)
+    NPC4 = Monster("Greg", 20, 44)
+    NPC5 = Monster("Bear", 20, 8)
+    Player_hero = Player("Luba", 7, 2)
     enemies = [NPC1, NPC2, NPC3, NPC4]
 
     # console.print("[bold green]Welcome hero![/]")
@@ -25,8 +25,8 @@ def main(stdscr):
     NPC4.level = 1
 
 
-    Player.level = 1
-    model = GameModel(Player, dark_forest)
+    Player_hero.level = 1
+    model = GameModel(Player_hero, dark_forest)
     view = GameView(stdscr, model)
 
 

@@ -41,7 +41,7 @@ class UILayout:
             "system_log": (1, 99),
         }
 
-        self.encounter_view = EncounterView(self.stdscr, self.logs.encounter, self.win_row_ranges["encounter"], self.win_col_ranges["encounter"])
+        self.encounter_view = EncounterView(self.stdscr, self.logs.encounter, self.win_row_ranges, self.win_col_ranges, self.model)
 
     def draw(self):
         self.init_windows()
@@ -49,9 +49,9 @@ class UILayout:
         self.draw_headlines()
         self.draw_descriptions()
         self.draw_header()
-        self.draw_encounter_info()
-
         self.draw_system()
+
+        self.draw_encounter_info()
 
     def init_windows(self):
         header_xy = 0
@@ -89,6 +89,7 @@ class UILayout:
 
     def draw_headlines(self):
         self.stdscr.addstr(3, 22, f" Player ")
+
         self.stdscr.addstr(3, 71, f" Enemy ")
         self.stdscr.addstr(15, 40, f" Encounter / Story Area ")
         self.stdscr.addstr(22, 44, f" Combat Log ")
@@ -105,8 +106,7 @@ class UILayout:
 
     def draw_system(self):
         min_y, max_y = self.win_row_ranges["system_log"]
-        self.stdscr.addstr(min_y, 1,
-                           f"{self.model.prompt}")
+        self.stdscr.addstr(min_y, 1, f"{self.model.prompt}")
 
     def draw_encounter_info(self):
-        self.encounter_view.draw_combat_log()
+        self.encounter_view.draw_encounter()
