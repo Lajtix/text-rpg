@@ -17,13 +17,14 @@ class EncounterLogs:
         self.loot = Log(20, 12, 0)
         self.end = Log(1, 3, 0)
         self.enemy = Log(1, 0, 18)
-        self.flee = Log(1, 0, 0)
+        self.flee = Log(1, 0, 2)
 
     def __iter__(self):
         yield self.combat
         yield self.loot
         yield self.end
         yield self.enemy
+        yield self.flee
 
     def clear_combat_logs(self):
         self.combat.lines.clear()

@@ -1,5 +1,6 @@
 from random import randint
 import random
+from models.inventory import Inventory
 class Character:
     def __init__(self, name, hp, xp):
         self.name = name
@@ -10,6 +11,7 @@ class Character:
         self.gold = 0
         self.level_ups_list = [0, 10, 20, 30, 40, 50]
         self.alive = True
+        self.inventory = Inventory()
 
     def take_damage(self, amount, attacker, logs):
         log = [("You: Hit for ", "normal"), (f"-{amount}", "damage"), (" HP", "hp_value")]
@@ -63,6 +65,7 @@ class Monster(Character):
             return 1
         else:
             return 0
+
 
 
 

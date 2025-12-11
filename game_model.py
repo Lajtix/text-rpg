@@ -16,12 +16,11 @@ class GameModel:
         self.mode = "EXPLORE"
         self.encounter = None
         self.prompt = "[M] to move, [A] to hunt"
-        self.message_logs.encounter.flee.add_line([("gggggg", "normal")])
         self.commands = {
             "EXPLORE" : {
                 "M" : self.cmd_move,
                 "A" : self.cmd_hunt,
-
+                "I" : self.cmd_inventory,
             },
             "ENCOUNTER": {
                 "A" : self.cmd_attack,
@@ -30,11 +29,17 @@ class GameModel:
             "ENCOUNTER_END": {
                 "L" : self.cmd_leave,
             },
+            "INVENTORY" : {
+                "A" : self.player.inventory.move_left,
+                "W" : self.player.inventory.move_right,
+            }
         }
     def run(self, stdscr):
         self.main_game_loop()
 
     def process_command(self, cmd):
+        if cmd == None:
+            return
         action = self.commands[self.mode][cmd]
         if not action:
             print("Unknown command. Press ? for help.")
@@ -76,6 +81,9 @@ class GameModel:
         self.encounter.take_damage(dmg_amount, self.player, self.message_logs.encounter.combat)
         self.update_encounter_info()
 
+        self.cmd_end_of_encounter()
+
+    def cmd_end_of_encounter(self):
         if not self.is_encounter_alive():
             log = [(f"{self.player.name} killed {self.encounter.name} and gained {self.encounter.xp}xp", "normal")]
             self.message_logs.encounter.end.add_line(log)
@@ -93,18 +101,15 @@ class GameModel:
         return self.encounter.alive
 
     def cmd_flee(self):
-        self.message_logs.encounter.flee.add_line([("gggggg", "normal")])
         if (self.can_flee):
             if (self.encounter.flee(self.player) == 1):
                 #self.encounter = None
                 self.mode = "ENCOUNTER_END"
                 log = [("Flee was successful", "normal")]
-                self.message_logs.encounter.flee.add_line(log)
-                print(f"Flee was successful")
+                self.message_logs.encounter.end.add_line(log)
             else:
                 log = [("Flee was not successful", "normal")]
-                self.message_logs.encounter.flee.add_line(log)
-                print(f"Flee wasn't successful")
+                self.message_logs.encounter.end.add_line(log)
                 self.can_flee = False
         else:
             pass
@@ -127,6 +132,9 @@ class GameModel:
                 (f"] HP", "normal")
             ]
             self.message_logs.encounter.enemy.add_line(log)
+
+    def cmd_inventory(self):
+        self.mode = "INVENTORY"
 
 
 

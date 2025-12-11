@@ -1,6 +1,6 @@
 from .encounter_view import EncounterView
 from models.logs import EncounterLogs
-
+from .player_view import PlayerView
 class UILayout:
     def __init__(self, stdscr, model):
         self.model = model
@@ -42,6 +42,7 @@ class UILayout:
         }
 
         self.encounter_view = EncounterView(self.stdscr, self.logs.encounter, self.win_row_ranges, self.win_col_ranges, self.model)
+        self.player_view = PlayerView(self.model.player, self.stdscr, self.win_row_ranges, self.win_col_ranges, self.model)
 
     def draw(self):
         self.init_windows()
@@ -52,6 +53,10 @@ class UILayout:
         self.draw_system()
 
         self.draw_encounter_info()
+        self.player_view.draw_inventory()
+
+        if(self.model.mode == "INVENTORY"):
+            self.player_view.select_item()
 
     def init_windows(self):
         header_xy = 0

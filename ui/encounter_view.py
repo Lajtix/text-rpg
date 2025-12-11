@@ -20,10 +20,11 @@ class EncounterView:
             self.draw_enemy()
             self.draw_combat_log()
             if(self.model.message_logs.encounter.flee != None):
-                self.draw_flee()
+                pass
 
         if(self.model.mode == "ENCOUNTER_END"):
             self.draw_end_log()
+            #self.draw_flee()
 
 
 
@@ -66,4 +67,4 @@ class EncounterView:
         col_min, col_max = self.win_col_ranges["encounter"]
         self.stdscr.addstr(row_max, col_min + 1, "gggga", self.style_map["normal"])
         text, attr = self.model.message_logs.encounter.flee.lines[0][0]
-        self.stdscr.addstr(row_max, col_min + 1, "gggga", self.style_map[attr])
+        self.stdscr.addstr(row_max, col_min + 1, text, self.style_map[attr])

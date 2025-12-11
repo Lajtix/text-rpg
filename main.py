@@ -5,8 +5,9 @@ from ui.game_view import GameView
 import curses
 
 def main(stdscr):
-
-
+    stdscr.nodelay(True)  # getch won't block
+    stdscr.timeout(50)
+    curses.curs_set(0)
 
     NPC1 = Monster("Greg", 5, 11)
     NPC2 = Monster("Greg", 10, 22)
@@ -29,21 +30,18 @@ def main(stdscr):
     model = GameModel(Player_hero, dark_forest)
     view = GameView(stdscr, model)
 
-
-
+    stdscr.clear()
     while True:
-        stdscr.clear()
-        #cmd = stdscr.get_wch()
-        #action = model.commands[model.mode][cmd]
-        #if not action:
-        #    print("Unknown command. Press ? for help.")
-        #    continue
-        #action()
-        # 1. View draws the screen
+
         view.draw()
 
         # 2. CONTROLLER (main) gets the input
-        key = stdscr.get_wch() # <-- IT MOVES HERE
+        try:
+            key = stdscr.get_wch()
+            stdscr.clear()
+            view.draw()
+        except curses.error:
+            key = None
 
         # 3. Controller checks for global quit
         if key in [ord('q'), ord('Q')]:
